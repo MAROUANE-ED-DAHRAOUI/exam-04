@@ -36,10 +36,10 @@ my notes:
 	Q: what about  '))))' ?
 	A: four spaces '    ' */
 
-#include <unistd.h>
-
-int calcul_removals(char *str)
-{
+	#include <unistd.h>
+	
+	int calcul_removals(char *str)
+	{
 	  int open;
 	  int close;
 	  int i;
@@ -60,11 +60,11 @@ int calcul_removals(char *str)
 		}
 		i++;
 	  }
-	return (open + close);
-}
+	  return (open + close);
+	}
 	
-int valid_str(char *str)
-{
+	int valid_str(char *str)
+	{
 	  int i;
 	  int b;
 	  
@@ -83,10 +83,10 @@ int valid_str(char *str)
 	  if (b != 0)
 		return 1;
 	  return 0;
-}
+	}
 	
-void  gen_valid_strs(char *str, int i, int len, int removals)
-{
+	void  gen_valid_strs(char *str, int i, int len, int removals)
+	{
 	  if (i == len)
 	  {
 		if (removals == 0 && !valid_str(str)) // add check for balanced str
@@ -109,10 +109,10 @@ void  gen_valid_strs(char *str, int i, int len, int removals)
 		str[i] = old;
 	  }
 	  gen_valid_strs(str, i + 1, len, removals);
-}
+	}
 	
-int main(int ac, char **av)
-{
+	int main(int ac, char **av)
+	{
 	  if (ac != 2)
 		return 1;
 	  int   len;
@@ -123,4 +123,5 @@ int main(int ac, char **av)
 	  removals = calcul_removals(av[1]);
 	  gen_valid_strs(av[1], 0, len, removals);
 	  return 0;
-}
+	}
+		

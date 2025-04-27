@@ -54,123 +54,161 @@ the shortest path is:
   4.00$*/
 
 
- #include <unistd.h>
- #include <math.h>
- #include <stdio.h>
+ //the code is already given you just need to write the following functions:
+//tsp - calculate_path_length - swap - permute
 
-  #define MAX 11
-  #define INF 1e9
-  
-  typedef struct 
-  {
-      float x;
-      float y;
-  } City;
-  
-  // Global variables
-  City cities[MAX];
-  int num_cities = 0;
-  int path[MAX];
-  int best_path[MAX];
-  float min_distance = INF;
-  
-  // Calculate Euclidean distance between two cities
-  float distance(City a, City b) 
-  {
-      return sqrtf(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
-  }
-  
-  // Calculate total path length
-  float calculate_path_length() 
-  {
-      float total = 0;
-      for (int i = 0; i < num_cities - 1; i++) 
-      {
-          total += distance(cities[path[i]], cities[path[i + 1]]);
-      }
-      // Add distance back to starting city
-      total += distance(cities[path[num_cities - 1]], cities[path[0]]);
-      return total;
-  }
-  
-  // Swap two elements in array
-  void swap(int *a, int *b) 
-  {
-      int temp = *a;
-      *a = *b;
-      *b = temp;
-  }
-  
-  /**
- * @brief Generates all permutations of the cities using Heap's algorithm.
- *
- * This function recursively generates all permutations of the city indices
- * and calculates the total distance for each permutation. If a shorter path
- * is found, it updates the global variables `min_distance` and `best_path`.
- *
- * @param k The size of the current subset of the array to permute.
- */
-  void generate_permutations(int k) 
-  {
-      if (k == 1) 
-      {
-          float current_distance = calculate_path_length();
-          if (current_distance < min_distance) 
-          {
-              min_distance = current_distance;
-              for (int i = 0; i < num_cities; i++) 
-              {
-                  best_path[i] = path[i];
-              }
-          }
-          return;
-      }
-  
-      for (int i = 0; i < k; i++) 
-      {
-          generate_permutations(k - 1);
-          if (k % 2 == 0) 
-          {
-              swap(&path[i], &path[k - 1]);
-          } 
-          else 
-          {
-              swap(&path[0], &path[k - 1]);
-          }
-      }
-  }
+#include <stdio.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <stdbool.h>
+#include <float.h>
 
-  /**
- * @brief Main function to solve the TSP.
- *
- * Reads city coordinates from standard input, generates all permutations of
- * the cities, and calculates the shortest path. The result is printed to
- * standard output with exactly two decimal places.
- *
- * @return 0 on successful execution.*/
-  
-  int main() 
-  {
-      // Read city coordinates from stdin
-      float x, y;
-      while (fscanf(stdin, "%f, %f", &x, &y) == 2 && num_cities < MAX)
-      {
-          cities[num_cities].x = x;
-          cities[num_cities].y = y;
-          path[num_cities] = num_cities;  // Initialize path array
-          num_cities++;
-      }
-  
-      if (num_cities == 0) {
-          fprintf(stdout, "0.00\n");
-          return 0;
-      }
-  
-      // Generate all possible permutations and find shortest path
-      generate_permutations(num_cities);
-  
-      // Print result with exactly 2 decimal places
-      fprintf(stdout, "%.2f\n", min_distance);
-  
-      return 0;
-  }
+float    distance(float a[2], float b[2])
+{
+    return sqrtf((b[0] - a[0]) * (b[0] - a[0]) + (b[1] - a[1]) * (b[1] - a[1]));
+}
+
+
+
+
+
+
+
+
+float calculate_path_length(float (*array)[2], int *perm, ssize_t size)
+{
+    float length = 0.0f;
+    for (ssize_t i = 0; i < size - 1; i++) {
+        length += distance(array[perm[i]], array[perm[i + 1]]);
+    }
+    length += distance(array[perm[size - 1]], array[perm[0]]);
+    return length;
+}
+
+void swap(int *a, int *b)
+{
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+void permute(int *perm, ssize_t start, ssize_t size, float (*array)[2], float *min_path)
+{
+    if (start == size) {
+        float path_length = calculate_path_length(array, perm, size);
+        if (path_length < *min_path)
+            *min_path = path_length;
+        return;
+    }
+    for (ssize_t i = start; i < size; i++) {
+        swap(&perm[start], &perm[i]);
+        permute(perm, start + 1, size, array, min_path);
+        swap(&perm[start], &perm[i]);
+    }
+}
+
+float tsp(float (*array)[2], ssize_t size)
+{
+    if (size < 2)
+        return 0.0f;
+
+    int *perm = malloc(sizeof(int) * size);
+    if (!perm) {
+        perror("malloc");
+        return 0.0f;
+    }
+
+    for (ssize_t i = 0; i < size; i++)
+        perm[i] = i;
+
+    float shortest_length = FLT_MAX;
+    permute(perm, 0, size, array, &shortest_length);
+    free(perm);
+    return shortest_length;
+}
+
+
+
+
+
+
+
+
+
+ssize_t    file_size(FILE *file)
+{
+    char    *buffer = NULL;
+    size_t    n = 0;
+    ssize_t ret;
+
+    errno = 0;
+
+    for (ret = 0; getline(&buffer, &n, file) != -1; ret++);
+
+    free(buffer);
+    if (errno || fseek(file, 0, SEEK_SET))
+        return -1;
+    return ret;
+}
+
+int        retrieve_file(float (*array)[2], FILE *file)
+{
+    int tmp;
+    for (size_t i = 0; (tmp = fscanf(file, "%f, %f\n", array[i] + 0, array[i] + 1)) != EOF; i++)
+        if (tmp != 2)
+        {
+            errno = EINVAL;
+            return -1;
+        }
+    if (ferror(file))
+        return -1;
+    return 0;
+}
+
+int        main(int ac, char **av)
+{
+    char *filename = "stdin";
+    FILE *file = stdin;
+    if (ac > 1)
+    {
+        filename = av[1];
+        file = fopen(filename, "r");
+    }
+
+    if (!file)
+    {
+        fprintf(stderr, "Error opening %s: %m\n", filename);
+        return 1;
+    }
+
+    ssize_t size = file_size(file);
+    if (size == -1)
+    {
+        fprintf(stderr, "Error reading %s: %m\n", filename);
+        fclose(file);
+        return 1;
+    }
+
+    float (*array)[2] = calloc(size, sizeof (float [2]));
+    if (!array)
+    {
+        fprintf(stderr, "Error: %m\n");
+        fclose(file);
+        return 1;
+    }
+
+    if (retrieve_file(array, file) == -1)
+    {
+        fprintf(stderr, "Error reading %s: %m\n", av[1]);
+        fclose(file);
+        free(array);
+        return 1;
+    }
+    if (ac > 1)
+        fclose(file);
+
+    printf("%.2f\n", tsp(array, size));
+    free(array);
+}
