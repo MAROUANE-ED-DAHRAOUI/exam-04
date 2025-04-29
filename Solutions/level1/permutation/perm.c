@@ -65,7 +65,7 @@ void	bubble_sort(char *set, int len)
 			}
 		}
 		if (sorted)
-			break ;
+				break ;
 	}
 }
 
@@ -109,7 +109,6 @@ int	main(int argc, char **argv)
 		tmp[i] = 48;
 		was_included[i] = false;
 	}
-
 	set[len] = '\0';
 	tmp[len] = '\0';
 	bubble_sort(set, len);

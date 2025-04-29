@@ -107,13 +107,12 @@ int	parse_int(json *dst, FILE *stream)
 char *get_str(FILE *stream)
 {
 	char *res = calloc(4096, sizeof(char));
-	int i = 0;
-	char c = getc(stream);
+	int   i = 0;
+	char  c = getc(stream);
 
 	while (1)
 	{
 		c = getc(stream);
-		
 		if (c == '"')
 			break ;
 		if (c == EOF)
@@ -122,7 +121,7 @@ char *get_str(FILE *stream)
 			return NULL;
 		}
 		if (c == '\\')
-			c = getc(stream);
+				c = getc(stream);
 		res[i++] = c;
 	}
 	return (res);

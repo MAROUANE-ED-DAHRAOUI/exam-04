@@ -56,7 +56,7 @@ int picoshell(char **cmds[])
 			execvp(cmds[i][0], cmds[i]);
 			exit(EXIT_FAILURE);
 		}
-	
+
 		if (prev_fd != -1)
 			close(prev_fd);
 		if (cmds[i + 1]) {
